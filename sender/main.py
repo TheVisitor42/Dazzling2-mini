@@ -9,3 +9,6 @@ to another Pico 2 using UART.
 """
 
 print("UART Sender Starting...")
+
+dict1 = {}
+config1 = {}
