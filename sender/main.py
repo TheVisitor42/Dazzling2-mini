@@ -1,14 +1,18 @@
-"""
-Dazzling2-mini
+#Sender-main.py
 
-Pico 2 UART Sender
+from machine import UART, Pin
+import time
+from shared.constants import BAUD_RATE
 
-Purpose:
-Send data packets from one Raspberry Pi Pico 2
-to another Pico 2 using UART.
-"""
+message = "Hello Pico!"
 
-print("UART Sender Starting...")
+uart = UART(
+    0,
+    baudrate=BAUD_RATE,
+    tx=Pin(0),
+    rx=Pin(1)
+)
 
-dict1 = {}
-config1 = {}
+while True:
+    uart.write(message)
+    time.sleep(1)
