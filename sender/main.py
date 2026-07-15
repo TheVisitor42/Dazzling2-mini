@@ -3,6 +3,7 @@
 from machine import UART, Pin
 import time
 from shared.constants import BAUD_RATE
+import json
 
 
 #Data Structure Example
@@ -108,6 +109,15 @@ system_data = {
 }
 
 print(system_data)
+print(type(system_data))
+      
+
+json_message = json.dumps(system_data)
+print(json_message)
+print(type(json_message))
+      
+
+
 
 #UART Connection
 
@@ -119,6 +129,8 @@ uart = UART(
     tx=Pin(0),
     rx=Pin(1)
 )
+
+uart.write(json_message.encode())
 
 while True:
     uart.write(message)
