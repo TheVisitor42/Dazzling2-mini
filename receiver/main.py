@@ -1,11 +1,19 @@
-"""
-Dazzling2-mini
+from machine import UART, Pin
+import time
+from shared.constants import BAUD_RATE
 
-Pico 2 UART Receiver
+uart = UART(
+    0,
+    baudrate=BAUD_RATE,
+    tx=Pin(0),
+    rx=Pin(1)
+)
 
-Purpose:
-Receive data packets from another Raspberry Pi Pico 2
-using UART.
-"""
+print("Receiver started")
 
-print("UART Receiver Starting...")
+while True:
+    if uart.any():
+        data = uart.read()
+        print(data)
+
+    time.sleep(0.1)
