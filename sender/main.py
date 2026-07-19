@@ -106,6 +106,9 @@ save_state_data_example = {
         }
     }
 }
+
+
+
 def build_packet():
     return {"-stocks-": {
     
@@ -163,8 +166,8 @@ packet = build_packet()
 
 #
 
-#check system_data works
-print(system_data)
+#save_state_data_example message, type, and length
+print(save_state_data_example)
 print(type(save_state_data_example))
 print(len(save_state_data_example))
 print('---------######################_______________)))))))))))%%%%%%%%%%%%%')
@@ -174,16 +177,20 @@ print('---------######################_______________)))))))))))%%%%%%%%%%%%%')
 #check packet works
 print('PACKET =',packet)
 print(type(packet))
+print('packet length is',len(packet))
+print("\n")
+
 #Convert sys_data_example to a UART usable type
 json_message = json.dumps(packet)
-json_message += "\n"
-print(json_message)
-print(type(json_message))
-print(len(json_message))
+json_message += "\n"    #Append a newline operator.
+
+print('JSON:',json_message)
+print('JSON message type:',type(json_message))
+print('JSON message length',len(json_message))
 
 #UART Connection
 
-message = "Hello Pico! --Sender"
+#message = "Hello Pico! --Sender"
 
 uart = UART(
     0,
@@ -197,6 +204,6 @@ while True:
     time.sleep(1)
     #SEND PACKET
     uart.write(json_message.encode())
-    time.sleep(3)
-##### Mary Cassett artwork v.
+    time.sleep(1)
+
 
