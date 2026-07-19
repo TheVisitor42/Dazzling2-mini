@@ -9,15 +9,15 @@ uart = UART(
     rx=Pin(1)
 )
 
-print("Receiver started")
+print("---------------Receiver started---------------")
+def receive_packet():
+    while True:
+        if uart.any():
+            data = uart.read()
+            print(data)
+            print(len(data), data)
 
-while True:
-    if uart.any():
-        data = uart.read()
-        print(data)
-        print(len(data), data)
-
-    time.sleep(0.25)
+        time.sleep(0.25)
     
     #the UART buffer is only 256 bytes
     
