@@ -221,3 +221,29 @@ while True:
     send_packet(packet)
 
     time.sleep(1)
+
+
+def send_weather():
+#weather gets triggered to send its dictionary.
+return
+def send_stocks():
+#weather gets triggered to send its dictionary.
+return
+def send_news():
+#weather gets triggered to send its dictionary.
+return
+def send_calendar():
+#weather gets triggered to send its dictionary.
+return
+def send_clock():
+#weather gets triggered to send its dictionary.
+return
+def send_reminders():
+#reminders gets triggered to send its dictionary.
+return
+def send_art():
+#art gets triggered to send its dictionary.
+return
+def send_diagnostics():
+#diagnostics gets triggered to send its dictionary.
+return
