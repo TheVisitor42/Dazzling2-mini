@@ -1,11 +1,31 @@
-#Sender-main.py
-
 from machine import UART, Pin
 import time
 from shared.constants import BAUD_RATE
 import json
 
-#Data Structure Example
+
+# -------------------------------------------------
+# UART Connection
+# -------------------------------------------------
+
+uart = UART(
+    0,
+    baudrate=BAUD_RATE,
+    tx=Pin(0),
+    rx=Pin(1)
+)
+
+
+# -------------------------------------------------
+# Global Variables
+# -------------------------------------------------
+
+sequence_number = 0
+
+
+# -------------------------------------------------
+# Save State Example (Not transmitted)
+# -------------------------------------------------
 
 save_state_data_example = {
     "modes": [
@@ -55,7 +75,7 @@ save_state_data_example = {
         },
 
         "-calendar-": {
-            "date":"July 15",
+            "date": "July 15",
             "event": "dentist appt. 10AM"
         },
 
@@ -63,7 +83,6 @@ save_state_data_example = {
 
         "-reminders-": "Dinner with Gal tomorrow @ 5:30PM @ Grease Monkey"
     },
-
 
     "EINK": {
 
@@ -74,7 +93,6 @@ save_state_data_example = {
         }
     },
 
-
     "-diagnostics-": {
         "cputemp": 38,
         "runtime": "10H30M10S",
@@ -82,7 +100,6 @@ save_state_data_example = {
         "droppedAPI": None,
         "unexpectederr": 2
     },
-
 
     "meta": {
         "version": 1,
@@ -108,102 +125,99 @@ save_state_data_example = {
 }
 
 
+# -------------------------------------------------
+# Debug save_state_data_example
+# -------------------------------------------------
 
-def build_packet():
-    return {"-stocks-": {
-    
-            "BRK.B": {
-                "price": 500,
-                "per_": 0.51,
-                "pe_": 15,
-                "name": "Berkshire Hathaway"},
-
-            "NTDOY": {
-                "price": 11.01,
-                "per_": -1.01,
-                "pe_": 17,
-                "name": "Nintendo"}
-            },
-                     "meta": {
-        "version": 1,
-        "sequence": 0,
-
-        "calls": {
-            "stocks": [
-                12,
-                {
-                    "BRK.B": 6,
-                    "NTDOY": 6
-                }
-            ],
-            "weather": 23,
-            "news": 1,
-            "calendar": 0,
-            "clock": 3,
-            "reminders": 0,
-            "art": 5,
-            "diagnostics": 0
-        }
-    }
-}
-
-packet = build_packet()
-#
-
-
-      
-
-
-      
-
-
-
-#UART Connection
-
-
-
-
-
-#
-
-#save_state_data_example message, type, and length
 print(save_state_data_example)
 print(type(save_state_data_example))
 print(len(save_state_data_example))
-print('---------######################_______________)))))))))))%%%%%%%%%%%%%')
+
+print("---------------------------------------------")
 
 
-#----------
-#check packet works
-print('PACKET =',packet)
-print(type(packet))
-print('packet length is',len(packet))
-print("\n")
+# -------------------------------------------------
+# Build Packet
+# -------------------------------------------------
 
-#Convert sys_data_example to a UART usable type
-json_message = json.dumps(packet)
-json_message += "\n"    #Append a newline operator.
+def build_packet():
 
-print('JSON:',json_message)
-print('JSON message type:',type(json_message))
-print('JSON message length',len(json_message))
+    global sequence_number
 
-#UART Connection
+    packet = {
+        "type": "data",
 
-#message = "Hello Pico! --Sender"
+        "mode": "weather",
 
-uart = UART(
-    0,
-    baudrate=BAUD_RATE,
-    tx=Pin(0),
-    rx=Pin(1)
-)
+        "data": {
+            "temperature": 76,
+            "wind_speed": 5,
+            "sunrise": "7:05 AM",
+            "sunset": "7:30 PM",
+            "precipitation": "4%"
+        },
+
+        "meta": {
+            "version": 1,
+            "sequence": sequence_number
+        }
+    }
+    #debug
+    print("Sequence:", packet["meta"]["sequence"])
+    #increment sequence number
+    
+    sequence_number += 1
+
+    return packet
+
+
+# -------------------------------------------------
+# Send Packet
+# -------------------------------------------------
+
+def send_packet(packet):
+
+    # Packet debug
+
+    print("Packet:")
+    print(packet)
+    print()
+
+    print("Packet type:", type(packet))
+    print("Top-level keys:", len(packet))
+    print()
+
+    # Convert dictionary to JSON
+
+    json_message = json.dumps(packet)
+
+    # Add packet terminator
+
+    json_message += "\n"
+
+    # JSON debug
+
+    print("JSON:")
+    print(json_message)
+    print()
+
+    print("JSON type:", type(json_message))
+    print("JSON length:", len(json_message))
+    print("---------------------------------------------")
+
+    # Send packet
+
+    uart.write(json_message.encode())
+
+
+# -------------------------------------------------
+# Main Loop
+# -------------------------------------------------
 
 while True:
-    #uart.write(message)
-    time.sleep(1)
-    #SEND PACKET
-    uart.write(json_message.encode())
-    time.sleep(1)
 
+    packet = build_packet()
 
+    send_packet(packet)
+
+    time.sleep(1)
