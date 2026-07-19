@@ -71,7 +71,7 @@ Interface
 
 Baud Rate
 
-- 115200 baud
+- 9600 baud
 
 Encoding
 
