@@ -516,11 +516,11 @@ Examples
 
 Stocks
 
-- Every 5 minutes
+- Every day of the work week at noon
 
 Weather
 
-- Every 30 minutes
+- Every day at noon and every other day at 6 am and pm. 
 
 Clock
 
