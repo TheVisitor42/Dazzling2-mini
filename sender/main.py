@@ -7,7 +7,7 @@ import json
 
 #Data Structure Example
 
-system_data = {
+save_state_data_example = {
     "modes": [
         "stocks",
         "weather",
@@ -165,7 +165,12 @@ packet = build_packet()
 
 #check system_data works
 print(system_data)
-print(type(system_data))
+print(type(save_state_data_example))
+print(len(save_state_data_example))
+print('---------######################_______________)))))))))))%%%%%%%%%%%%%')
+
+
+#----------
 #check packet works
 print('PACKET =',packet)
 print(type(packet))
