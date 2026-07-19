@@ -5,7 +5,6 @@ import time
 from shared.constants import BAUD_RATE
 import json
 
-
 #Data Structure Example
 
 system_data = {
@@ -107,21 +106,78 @@ system_data = {
         }
     }
 }
+def build_packet():
+    return {"-stocks-": {
+    
+            "BRK.B": {
+                "price": 500,
+                "per_": 0.51,
+                "pe_": 15,
+                "name": "Berkshire Hathaway"},
 
-print(system_data)
-print(type(system_data))
+            "NTDOY": {
+                "price": 11.01,
+                "per_": -1.01,
+                "pe_": 17,
+                "name": "Nintendo"}
+            },
+                     "meta": {
+        "version": 1,
+        "sequence": 0,
+
+        "calls": {
+            "stocks": [
+                12,
+                {
+                    "BRK.B": 6,
+                    "NTDOY": 6
+                }
+            ],
+            "weather": 23,
+            "news": 1,
+            "calendar": 0,
+            "clock": 3,
+            "reminders": 0,
+            "art": 5,
+            "diagnostics": 0
+        }
+    }
+}
+
+packet = build_packet()
+#
+
+
       
 
-json_message = json.dumps(system_data)
-print(json_message)
-print(type(json_message))
+
       
 
 
 
 #UART Connection
 
-message = "Hello Pico!"
+
+
+
+
+#
+
+#check system_data works
+print(system_data)
+print(type(system_data))
+#check packet works
+print('PACKET =',packet)
+print(type(packet))
+#Convert sys_data_example to a UART usable type
+json_message = json.dumps(packet)
+print(json_message)
+print(type(json_message))
+print(len(json_message))
+
+#UART Connection
+
+message = "Hello Pico! --Sender"
 
 uart = UART(
     0,
@@ -130,10 +186,11 @@ uart = UART(
     rx=Pin(1)
 )
 
-uart.write(json_message.encode())
-
 while True:
-    uart.write(message)
-    time.sleep(10)
+    #uart.write(message)
+    time.sleep(1)
+    #SEND PACKET
+    uart.write(json_message.encode())
+    time.sleep(3)
 
 

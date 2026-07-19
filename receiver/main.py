@@ -15,5 +15,9 @@ while True:
     if uart.any():
         data = uart.read()
         print(data)
+        print(len(data), data)
 
-    time.sleep(0.1)
+    time.sleep(0.25)
+    
+    #the UART buffer is only 256 bytes
+    
