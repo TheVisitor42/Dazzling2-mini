@@ -171,6 +171,7 @@ print('PACKET =',packet)
 print(type(packet))
 #Convert sys_data_example to a UART usable type
 json_message = json.dumps(packet)
+json_message += "\n"
 print(json_message)
 print(type(json_message))
 print(len(json_message))
@@ -192,5 +193,5 @@ while True:
     #SEND PACKET
     uart.write(json_message.encode())
     time.sleep(3)
-
+##### Mary Cassett artwork v.
 
