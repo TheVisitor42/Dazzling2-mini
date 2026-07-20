@@ -130,8 +130,12 @@ def display_weather(packet):
 
     weather = packet["data"]
 
-    print(weather["temperature"])
-    print(weather["wind_speed"])
+    print('TEMP:',weather["temperature"])
+    print('WIND SPEED:',weather["wind_speed"])
+    print('Sunrise:',weather["sunrise"])
+    print('Sunset:',weather["sunset"])
+    print('Percipitation:',weather["percipitation"])
+
 
 def display_stocks(packet):
 
