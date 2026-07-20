@@ -106,3 +106,55 @@ while True:
             pass
 
     time.sleep(0.01)
+
+def process_packet(packet):
+
+    mode = packet["mode"]
+
+    if mode == "weather":
+        display_weather(packet)
+
+    elif mode == "stocks":
+        display_stocks(packet)
+
+    elif mode == "news":
+        display_news(packet)
+
+    elif mode == "clock":
+        display_clock(packet)
+
+    else:
+        print("Unknown mode:", mode)
+
+def display_weather(packet):
+
+    weather = packet["data"]
+
+    print(weather["temperature"])
+    print(weather["wind_speed"])
+
+def display_stocks(packet):
+
+    stocks = packet["data"]
+
+    print(stocks["BRK.B"]["price"])
+
+def display_news(packet):
+    news = packet["data"]
+
+    print(news["top_stories"])
+
+elif display_clock(packet):
+
+    clock = packet["data"]
+
+    print(clock["time"])
+else:
+
+    unkown = packet["data"]
+
+    print(unkown["debug"])
+
+
+    
+    
