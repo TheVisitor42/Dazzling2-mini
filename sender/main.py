@@ -3,6 +3,17 @@ import time
 from shared.constants import BAUD_RATE
 import json
 
+#How to run this code (SENDER) with its sister code (RECEIVER)
+#Step 1. Open this code and run it.
+#Step 2. Close the code but don't stop it.
+#Step 3. Switch to using the other Pico
+#Step 4. Open and run the main.py for the RECEIVER Pico.
+#Step 5. Wait for shell output.
+
+
+#Give self time to switch to the Receiver Pico terminal and turn it on before the Sender Pico starts sending data over UART lines.
+time.sleep(30)
+
 
 # -------------------------------------------------
 # UART Connection
@@ -205,8 +216,9 @@ def send_packet(packet):
     print("JSON length:", len(json_message))
     print("---------------------------------------------")
 
-    # Send packet
+    
 
+    # Send packet
     uart.write(json_message.encode())
 
 
@@ -220,30 +232,4 @@ while True:
 
     send_packet(packet)
 
-    time.sleep(1)
-
-
-def send_weather():
-#weather gets triggered to send its dictionary.
-return
-def send_stocks():
-#weather gets triggered to send its dictionary.
-return
-def send_news():
-#weather gets triggered to send its dictionary.
-return
-def send_calendar():
-#weather gets triggered to send its dictionary.
-return
-def send_clock():
-#weather gets triggered to send its dictionary.
-return
-def send_reminders():
-#reminders gets triggered to send its dictionary.
-return
-def send_art():
-#art gets triggered to send its dictionary.
-return
-def send_diagnostics():
-#diagnostics gets triggered to send its dictionary.
-return
+    time.sleep(5)

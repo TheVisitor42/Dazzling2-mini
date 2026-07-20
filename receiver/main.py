@@ -91,38 +91,54 @@ def display_weather(packet):
 
     weather = packet["data"]
 
-    print('TEMP:',weather["temperature"])
-    print('WIND SPEED:',weather["wind_speed"])
-    print('Sunrise:',weather["sunrise"])
-    print('Sunset:',weather["sunset"])
-    print('Percipitation:',weather["percipitation"])
+    print("----- WEATHER -----")
+    print("Temperature:", weather["temperature"])
+    print("Wind Speed:", weather["wind_speed"])
+    print("Sunrise:", weather["sunrise"])
+    print("Sunset:", weather["sunset"])
+    print("Precipitation:", weather["precipitation"])
 
-#customize displays here.
+#Customize how the packet is displayed on the shell here.
 
 def display_stocks(packet):
 
     stocks = packet["data"]
-    print("Packet received")
-        print("Type:", packet["type"])
-        print("Mode:", packet["mode"])
-    print(stocks["BRK.B"]["price"])
+
+    print("----- STOCKS -----")
+
+    for symbol in stocks:
+        print(symbol, stocks[symbol])
+
+
 
 def display_news(packet):
+
     news = packet["data"]
 
-    print(news["top_stories"])
+    print("----- NEWS -----")
 
-elif display_clock(packet):
+    for story in news["top_stories"]:
+        print("-", story)
+        
+        
+        
+def display_clock(packet):
 
     clock = packet["data"]
 
+    print("----- CLOCK -----")
     print(clock["time"])
-else:
 
+
+
+def display_unkown(packet):
     unkown = packet["data"]
 
-    print(unkown["debug"])
-    
+    print(unkown["debug_message"])
+
+
+
+
 #Process packet
 def process_packet(packet):
 
@@ -184,6 +200,7 @@ while True:
             process_packet(packet)
 
     time.sleep(0.01)
+    
 
 
     
