@@ -2,7 +2,7 @@ from machine import UART, Pin
 import time
 import json
 from shared.constants import BAUD_RATE
-
+from receiver.oled import display_weather
 
 # -------------------------------------------------
 # UART Initialization
