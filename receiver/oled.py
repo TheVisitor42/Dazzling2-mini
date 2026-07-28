@@ -1,62 +1,68 @@
-#OLED setup 
+import ssd1306
 
-#address_oled12864 = "0xC3"
-
-#---
-
-from luma.core.interface.serial import i2c
-from luma.oled.device import ssd1306
-from luma.core.render import canvas
-
-
-# -----------------------------------------
-# OLED Initialization
-# -----------------------------------------
-
-serial = i2c(
-    port=1,
-    address=0x3C
+from multiplexer import (
+    i2c,
+    select_mux_channel
 )
 
-oled = ssd1306(serial)
+
+OLED_ADDR = 0x3C
+WIDTH = 128
+HEIGHT = 64
 
 
-# -----------------------------------------
-# Display Functions
-# -----------------------------------------
+oleds = {}
 
-def display_weather(packet):
 
-    weather = packet["data"]
+def initialize_oleds():
 
-    with canvas(oled) as draw:
+    for ch in range(4):
 
-        draw.text(
-            (0, 0),
-            "WEATHER",
-            fill="white"
+        select_mux_channel(ch)
+
+        oled = ssd1306.SSD1306_I2C(
+            WIDTH,
+            HEIGHT,
+            i2c,
+            addr=OLED_ADDR
         )
 
-        draw.text(
-            (0, 15),
-            "Temp: {} F".format(
-                weather["temperature"]
-            ),
-            fill="white"
+        oled.fill(0)
+
+        oled.text(
+            "OLED #{}".format(ch),
+            0,
+            0
         )
 
-        draw.text(
-            (0, 30),
-            "Wind: {} mph".format(
-                weather["wind_speed"]
-            ),
-            fill="white"
-        )
+        oled.show()
 
-        draw.text(
-            (0, 45),
-            "Rain: {}".format(
-                weather["precipitation"]
-            ),
-            fill="white"
-        )
+        oleds[ch] = oled
+
+
+    select_mux_channel(255)
+
+
+def test_display(display_num):
+
+    oled = oleds[display_num]
+
+    select_mux_channel(display_num)
+
+    oled.fill(0)
+
+    oled.text(
+        "Hello OLED",
+        0,
+        0
+    )
+
+    oled.text(
+        "Display {}".format(display_num),
+        0,
+        20
+    )
+
+    oled.show()
+
+    select_mux_channel(255)
