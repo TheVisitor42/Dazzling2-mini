@@ -1,15 +1,10 @@
+import time
 import ssd1306
-
-from multiplexer import (
-    i2c,
-    select_mux_channel
-)
-
+from multiplexer import i2c, select_mux_channel
 
 OLED_ADDR = 0x3C
 WIDTH = 128
 HEIGHT = 64
-
 
 oleds = {}
 
@@ -28,22 +23,17 @@ def initialize_oleds():
         )
 
         oled.fill(0)
-
-        oled.text(
-            "OLED #{}".format(ch),
-            0,
-            0
-        )
-
+        oled.text("OLED #{}".format(ch), 0, 0)
         oled.show()
 
         oleds[ch] = oled
 
+        time.sleep_ms(200)
 
     select_mux_channel(255)
 
 
-def test_display(display_num):
+def display_text(display_num, line1="", line2="", line3="", line4=""):
 
     oled = oleds[display_num]
 
@@ -51,17 +41,10 @@ def test_display(display_num):
 
     oled.fill(0)
 
-    oled.text(
-        "Hello OLED",
-        0,
-        0
-    )
-
-    oled.text(
-        "Display {}".format(display_num),
-        0,
-        20
-    )
+    oled.text(line1, 0, 0)
+    oled.text(line2, 0, 16)
+    oled.text(line3, 0, 32)
+    oled.text(line4, 0, 48)
 
     oled.show()
 
