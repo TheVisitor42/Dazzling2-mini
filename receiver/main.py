@@ -1,8 +1,5 @@
 from machine import UART, Pin
 import time
-import json
-
-from shared.constants import BAUD_RATE
 
 from oled import (
     initialize_oleds,
@@ -12,210 +9,255 @@ from oled import (
 )
 
 
-# -------------------------------------------------
+# =================================================
+# TEST SCHEDULE
+# =================================================
+
+WEATHER_INTERVAL = 60       # 1 minute
+STOCKS_INTERVAL = 30        # 30 seconds
+NEWS_INTERVAL = 120         # 2 minutes
+CLOCK_INTERVAL = 1          # 1 second
+
+
+# =================================================
 # UART
-# -------------------------------------------------
+# =================================================
 
 uart = UART(
     0,
-    baudrate=BAUD_RATE,
+    baudrate=115200,
     tx=Pin(0),
     rx=Pin(1)
 )
 
 
-buffer = b""
-
-
-# -------------------------------------------------
-# News Tracking
-# -------------------------------------------------
-
-# Stores the most recently received stories.
-# This prevents the same news packet from
-# restarting the paging cycle.
-current_news_stories = []
-
-
-# -------------------------------------------------
-# Receive Packet
-# -------------------------------------------------
-
-def receive_packet():
-
-    global buffer
-
-    if uart.any():
-
-        buffer += uart.read()
-
-        if b"\n" in buffer:
-
-            packet_bytes, buffer = buffer.split(b"\n", 1)
-
-            try:
-
-                packet_string = packet_bytes.decode("utf-8")
-
-                return json.loads(packet_string)
-
-            except UnicodeError:
-
-                print("Bad UTF-8 packet:")
-                print(packet_bytes)
-
-                return None
-
-            except ValueError:
-
-                print("Bad JSON packet:")
-                print(packet_bytes)
-
-                return None
-
-    return None
-
-
-# -------------------------------------------------
+# =================================================
 # Initialize OLEDs
-# -------------------------------------------------
+# =================================================
 
 print("Starting OLEDs...")
 
 initialize_oleds()
 
 print("OLEDs initialized.")
-print("Waiting for UART packet...")
 
 
-# -------------------------------------------------
-# Clock
-# -------------------------------------------------
+# =================================================
+# Test Data
+# =================================================
 
-def display_clock(packet):
+weather_counter = 0
+stocks_counter = 0
+news_counter = 0
 
-    clock = packet["data"]["datetime"]
-
-    display_text(
-        3,
-        clock
-    )
-
-    print("Clock displayed on OLED #3")
+current_news_stories = []
 
 
-# -------------------------------------------------
-# Stocks
-# -------------------------------------------------
+# =================================================
+# Timers
+# =================================================
 
-def display_stocks(packet):
-
-    stocks = packet["data"]
-
-    brk = stocks["BRK.B"]
-    ntdoy = stocks["NTDOY"]
-
-    display_text(
-        1,
-        "STOCKS",
-        "BRK.B $" + str(brk["price"]),
-        "NTDOY $" + str(ntdoy["price"]),
-        "CHG " + str(brk["change"]) + " / " + str(ntdoy["change"])
-    )
-
-    print("Stocks displayed on OLED #1")
+last_weather_update = time.ticks_ms()
+last_stocks_update = time.ticks_ms()
+last_news_update = time.ticks_ms()
+last_clock_update = time.ticks_ms()
 
 
-# -------------------------------------------------
-# Weather
-# -------------------------------------------------
+# =================================================
+# TEST WEATHER
+# =================================================
 
-def display_weather(packet):
+def update_weather():
 
-    weather = packet["data"]
+    global weather_counter
+
+    weather_counter += 1
+
+    temperature = 70 + weather_counter
+    wind = 5 + weather_counter
+    rain = weather_counter % 4
 
     display_text(
         0,
         "WEATHER",
-        "TEMP " + str(weather["temperature"]),
-        "WIND " + str(weather["wind_speed"]),
-        "RAIN " + str(weather["precipitation"])
+        "TEMP " + str(temperature),
+        "WIND " + str(wind),
+        "RAIN " + str(rain)
     )
 
-    print("Weather displayed on OLED #0")
+    print(
+        "Weather update:",
+        weather_counter
+    )
 
 
-# -------------------------------------------------
-# Main Loop
-# -------------------------------------------------
+# =================================================
+# TEST STOCKS
+# =================================================
+
+def update_stocks():
+
+    global stocks_counter
+
+    stocks_counter += 1
+
+    brk_price = 500 + stocks_counter
+    ntdoy_price = 20 + stocks_counter
+
+    display_text(
+        1,
+        "STOCKS",
+        "BRK.B $" + str(brk_price),
+        "NTDOY $" + str(ntdoy_price),
+        "UPDATE " + str(stocks_counter)
+    )
+
+    print(
+        "Stocks update:",
+        stocks_counter
+    )
+
+
+# =================================================
+# TEST NEWS
+# =================================================
+
+def update_news_data():
+
+    global news_counter
+    global current_news_stories
+
+    news_counter += 1
+
+    stories = [
+        "Test news update number " + str(news_counter) +
+        " is now being displayed on the news screen.",
+
+        "Dazzling2 mini scheduler test is running successfully.",
+
+        "News pages continue cycling while other OLEDs update.",
+
+        "This is test data and does not use any API calls."
+    ]
+
+    current_news_stories = stories
+
+    start_news(stories)
+
+    print(
+        "News update:",
+        news_counter
+    )
+
+
+# =================================================
+# TEST CLOCK
+# =================================================
+
+def update_clock():
+
+    current_time = time.localtime()
+
+    hour = current_time[3]
+    minute = current_time[4]
+    second = current_time[5]
+
+    time_string = "{:02d}:{:02d}:{:02d}".format(
+        hour,
+        minute,
+        second
+    )
+
+    display_text(
+        3,
+        "CLOCK",
+        time_string
+    )
+
+
+# =================================================
+# Main Scheduler
+# =================================================
+
+print("Starting test scheduler...")
+
+# Force all displays to update immediately
+update_weather()
+update_stocks()
+update_news_data()
+update_clock()
+
 
 while True:
 
-    packet = receive_packet()
-
-    if packet is not None:
-
-        print("Packet received:")
-        print(packet)
-
-        received_sequence = packet["meta"]["sequence"]
-
-        print("Sequence:", received_sequence)
-
-        # -----------------------------------------
-        # Clock
-        # -----------------------------------------
-
-        if packet["mode"] == "clock":
-
-            display_clock(packet)
-
-
-        # -----------------------------------------
-        # Stocks
-        # -----------------------------------------
-
-        elif packet["mode"] == "stocks":
-
-            display_stocks(packet)
-
-
-        # -----------------------------------------
-        # News
-        # -----------------------------------------
-
-        elif packet["mode"] == "news":
-
-            stories = packet["data"]["top_stories"]
-
-            # Only restart the news display if the
-            # actual stories have changed.
-            if stories != current_news_stories:
-
-                current_news_stories = stories
-
-                start_news(stories)
-
-                print("New news loaded")
-
-            else:
-
-                print("Same news received - continuing current pages")
-
-
-        # -----------------------------------------
-        # Weather
-        # -----------------------------------------
-
-        elif packet["mode"] == "weather":
-
-            display_weather(packet)
+    now = time.ticks_ms()
 
 
     # ---------------------------------------------
-    # Keep News Paging Running
+    # Weather
+    # ---------------------------------------------
+
+    if time.ticks_diff(
+        now,
+        last_weather_update
+    ) >= WEATHER_INTERVAL * 1000:
+
+        last_weather_update = now
+
+        update_weather()
+
+
+    # ---------------------------------------------
+    # Stocks
+    # ---------------------------------------------
+
+    if time.ticks_diff(
+        now,
+        last_stocks_update
+    ) >= STOCKS_INTERVAL * 1000:
+
+        last_stocks_update = now
+
+        update_stocks()
+
+
+    # ---------------------------------------------
+    # News
+    # ---------------------------------------------
+
+    if time.ticks_diff(
+        now,
+        last_news_update
+    ) >= NEWS_INTERVAL * 1000:
+
+        last_news_update = now
+
+        update_news_data()
+
+
+    # ---------------------------------------------
+    # Clock
+    # ---------------------------------------------
+
+    if time.ticks_diff(
+        now,
+        last_clock_update
+    ) >= CLOCK_INTERVAL * 1000:
+
+        last_clock_update = now
+
+        update_clock()
+
+
+    # ---------------------------------------------
+    # News Paging
     # ---------------------------------------------
 
     update_news()
+
+
+    # ---------------------------------------------
+    # Small Scheduler Delay
+    # ---------------------------------------------
 
     time.sleep_ms(10)
