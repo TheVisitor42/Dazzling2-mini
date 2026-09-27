@@ -3,7 +3,7 @@
 # Dazzling2-mini_2
 # Sender Pico
 #
-# Tests:
+# Tests continuous:
 # Scheduler -> queued events -> sequential execution
 #
 # NO real APIs
@@ -22,11 +22,7 @@ import time
 scheduler = Scheduler()
 
 
-# Three events close together.
-#
-# STOCKS_A  -> 9:00
-# WEATHER_A -> 9:01
-# NEWS_A    -> 9:02
+# Events scheduled close together.
 
 scheduler.add_weekly_event(
     Scheduler.MONDAY,
@@ -62,8 +58,6 @@ def fake_stocks_api():
     print()
     print("START STOCKS_A")
 
-    print("  Simulating stocks API call...")
-
     time.sleep(3)
 
     print("FINISH STOCKS_A")
@@ -74,8 +68,6 @@ def fake_weather_api():
     print()
     print("START WEATHER_A")
 
-    print("  Simulating weather API call...")
-
     time.sleep(2)
 
     print("FINISH WEATHER_A")
@@ -85,8 +77,6 @@ def fake_news_api():
 
     print()
     print("START NEWS_A")
-
-    print("  Simulating news API call...")
 
     time.sleep(4)
 
@@ -104,8 +94,7 @@ def execute_event(event):
 
     print()
     print("--------------------------------")
-    print("Executing:")
-    print("Event:", event_name)
+    print("Executing:", event_name)
     print("Profile:", profile)
     print("--------------------------------")
 
@@ -127,63 +116,119 @@ def execute_event(event):
 
 
 # ============================================================
-# SIMULATE TIME
+# FAKE CLOCK
+# ============================================================
+
+# We will pretend the Sender starts at:
+#
+# Monday 8:59 AM
+#
+# Each loop advances the fake clock by one minute.
+#
+# This lets us test the scheduler without waiting
+# for real clock time.
+
+fake_hour = 8
+fake_minute = 59
+
+
+def get_fake_time():
+
+    return (
+        2026,
+        9,
+        28,
+        fake_hour,
+        fake_minute,
+        0,
+        Scheduler.MONDAY,
+        0
+    )
+
+
+def advance_fake_time():
+
+    global fake_hour
+    global fake_minute
+
+    fake_minute += 1
+
+    if fake_minute >= 60:
+
+        fake_minute = 0
+        fake_hour += 1
+
+
+# ============================================================
+# MAIN TEST LOOP
 # ============================================================
 
 print()
 print("================================")
-print("SCHEDULER EXECUTION TEST")
+print("CONTINUOUS SCHEDULER TEST")
 print("================================")
 
 print()
-print("Initial scheduler check:")
+print("Starting fake time:")
 print("Monday 8:59 AM")
 
-events = scheduler.check(
-    (2026, 9, 28, 8, 59, 0, 0, 0)
-)
 
-print("Events returned:", events)
+for loop_number in range(6):
+
+    current_time = get_fake_time()
+
+    print()
+    print("================================")
+    print(
+        "Scheduler check:",
+        "{:02d}:{:02d}".format(
+            current_time[3],
+            current_time[4]
+        )
+    )
+    print("================================")
+
+    events = scheduler.check(
+        current_time
+    )
+
+    if events:
+
+        print()
+        print("Events queued:")
+
+        for event in events:
+
+            print(
+                " ",
+                event["event"],
+                event["profile"]
+            )
+
+        print()
+        print("Beginning sequential execution...")
+
+        for event in events:
+
+            execute_event(event)
+
+        print()
+        print("All queued events finished.")
+
+    else:
+
+        print("No events due.")
 
 
-# ============================================================
-# JUMP TO 9:03
-# ============================================================
+    # Move fake clock forward.
+    #
+    # Notice that the fake clock advances only
+    # after the API work finishes.
+    #
+    # This simulates the Sender being busy while
+    # API calls are running.
 
-print()
-print("================================")
-print("Jumping to 9:03 AM")
-print("================================")
-
-print()
-print("Scheduler should return:")
-print("1. STOCKS_A")
-print("2. WEATHER_A")
-print("3. NEWS_A")
-
-events = scheduler.check(
-    (2026, 9, 28, 9, 3, 0, 0, 0)
-)
-
-
-print()
-print("Events returned:")
-print(events)
-
-
-# ============================================================
-# EXECUTE QUEUE
-# ============================================================
-
-print()
-print("================================")
-print("EXECUTING EVENT QUEUE")
-print("================================")
-
-
-for event in events:
-
-    execute_event(event)
+    advance_fake_time()
 
 
 # ============================================================
@@ -192,5 +237,5 @@ for event in events:
 
 print()
 print("================================")
-print("EXECUTION TEST COMPLETE")
+print("CONTINUOUS TEST COMPLETE")
 print("================================")
