@@ -1,2 +1,21 @@
 # Dazzling2-mini
-second go at making a tiny personalized computer. My first one was a screen hooked into a Raspberry Pi 3A+. I made a 3D printed stand for it but the Pi died and now I just use it as a second monitor. The Dazzling2-mini will be a literal base for the Dazzling 1 to sit atop. 
+This is an automated data logger and display array. It uses two Raspberry Pi Pico 2 microcontrollers. Called Sender Pico and Receiver Pico, respectively. Sender's primary job is to gather data based on a predetermined schedule and determine what information to pass onto the Receiver Pico, before saving it for later analysis. Receiver Pico's primary job is to take the UART message from the Sender and then display it on one of its four 128 x 64 px OLED displays. 
+
+The main 4 tasks that will be ran on it are:
+- Weather updates
+- Stock prices
+- News headlines
+- Date and Time
+
+Future tasks:
+- Calendar Reminders
+- Screensavers
+
+Potential Project Scope Additions:
+- Integrated E-ink display for a weather map
+- Encoder based menu navigation
+- Small speaker
+- FRAM
+- More I2C devices such as the SSD1305 OLED, DAC, 8:1 analog switch, led lights
+
+
