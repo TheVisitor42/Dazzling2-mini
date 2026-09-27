@@ -6,10 +6,10 @@
 # Receives scheduled events and runs
 # the appropriate task.
 #
-# Weather is now connected to the
-# WeatherTask module.
+# A successful task can provide an update.
+# A failed task does not provide an update.
 #
-# Other tasks remain fake for now.
+# UART is NOT handled here yet.
 
 
 import time
@@ -46,7 +46,12 @@ class EventExecutor:
 
         print("  STOCKS_A complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     def stocks_b(self):
@@ -64,7 +69,12 @@ class EventExecutor:
 
         print("  STOCKS_B complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     def stocks_c(self):
@@ -82,7 +92,12 @@ class EventExecutor:
 
         print("  STOCKS_C complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     # ========================================================
@@ -99,13 +114,27 @@ class EventExecutor:
         if result["success"]:
 
             print("  WEATHER_A successful")
+            print("  New weather data available")
+
+            return {
+                "success": True,
+                "update": True,
+                "data": result["data"],
+                "error": None
+            }
 
         else:
 
             print("  WEATHER_A FAILED")
             print("  Error:", result["error"])
+            print("  No update will be sent")
 
-        return result
+            return {
+                "success": False,
+                "update": False,
+                "data": None,
+                "error": result["error"]
+            }
 
 
     def weather_b(self):
@@ -123,7 +152,12 @@ class EventExecutor:
 
         print("  WEATHER_B complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     # ========================================================
@@ -145,7 +179,12 @@ class EventExecutor:
 
         print("  NEWS_A complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     def news_b(self):
@@ -163,173 +202,15 @@ class EventExecutor:
 
         print("  NEWS_B complete")
 
-        return True
+        return {
+            "success": True,
+            "update": True,
+            "data": None,
+            "error": None
+        }
 
 
     def news_c(self):
 
         print()
-        print("START NEWS_C")
-
-        print("  Getting sports news...")
-
-        time.sleep(2)
-
-        print("  Processing sports data...")
-
-        time.sleep(1)
-
-        print("  NEWS_C complete")
-
-        return True
-
-
-    # ========================================================
-    # CLOCK TASK
-    # ========================================================
-
-    def clock(self):
-
-        print()
-        print("START CLOCK")
-
-        print("  Simulating NTP synchronization...")
-
-        time.sleep(2)
-
-        print("  CLOCK synchronization complete")
-
-        return True
-
-
-    # ========================================================
-    # EXECUTE EVENT
-    # ========================================================
-
-    def execute(self, event):
-
-        event_name = event["event"]
-        profile = event["profile"]
-
-        print()
-        print("================================")
-        print("EXECUTING EVENT")
-        print("================================")
-
-        print("Event:", event_name)
-        print("Profile:", profile)
-
-        self.event_count += 1
-
-        # ----------------------------------------------------
-        # STOCKS
-        # ----------------------------------------------------
-
-        if event_name == "stocks":
-
-            if profile == "STOCKS_A":
-
-                return self.stocks_a()
-
-            elif profile == "STOCKS_B":
-
-                return self.stocks_b()
-
-            elif profile == "STOCKS_C":
-
-                return self.stocks_c()
-
-            else:
-
-                print(
-                    "Unknown stocks profile:",
-                    profile
-                )
-
-                return False
-
-
-        # ----------------------------------------------------
-        # WEATHER
-        # ----------------------------------------------------
-
-        elif event_name == "weather":
-
-            if profile == "WEATHER_A":
-
-                return self.weather_a()
-
-            elif profile == "WEATHER_B":
-
-                return self.weather_b()
-
-            else:
-
-                print(
-                    "Unknown weather profile:",
-                    profile
-                )
-
-                return False
-
-
-        # ----------------------------------------------------
-        # NEWS
-        # ----------------------------------------------------
-
-        elif event_name == "news":
-
-            if profile == "NEWS_A":
-
-                return self.news_a()
-
-            elif profile == "NEWS_B":
-
-                return self.news_b()
-
-            elif profile == "NEWS_C":
-
-                return self.news_c()
-
-            else:
-
-                print(
-                    "Unknown news profile:",
-                    profile
-                )
-
-                return False
-
-
-        # ----------------------------------------------------
-        # CLOCK
-        # ----------------------------------------------------
-
-        elif event_name == "clock":
-
-            if profile == "CLOCK":
-
-                return self.clock()
-
-            else:
-
-                print(
-                    "Unknown clock profile:",
-                    profile
-                )
-
-                return False
-
-
-        # ----------------------------------------------------
-        # UNKNOWN EVENT
-        # ----------------------------------------------------
-
-        else:
-
-            print(
-                "Unknown event type:",
-                event_name
-            )
-
-            return False
+        print("START 
