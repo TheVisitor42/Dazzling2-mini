@@ -1,3 +1,5 @@
+#NTP Clock Test is to be run on the Sender Pico.
+
 import time
 import json
 from machine import UART, Pin
