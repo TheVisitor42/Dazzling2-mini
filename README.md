@@ -15,7 +15,7 @@ Potential Project Scope Additions:
 - Integrated E-ink display for a weather map
 - Encoder based menu navigation
 - Small speaker
-- FRAM
+- FRAM breakout chip that stores last state or helps with meshtastic node
 - More I2C devices such as the SSD1305 OLED, DAC, 8:1 analog switch, led lights
 
 
