@@ -10,7 +10,9 @@ from oled import (
     start_news,
     update_news
 )
-
+#---------------
+# DAZZLING2-MINI RECEIVER
+#---------------
 uart = UART(
     0,
     baudrate=BAUD_RATE,
@@ -38,13 +40,38 @@ clock_last_update = 0
 clock_synchronized = False
 
 
+# ========================================
+# NEXT EVENT DISPLAY STATE
+# ========================================
+
+next_event_time = "--:--"
+next_event_date = "--/--/----"
+next_event_label = "WAITING FOR SCHEDULE"
+
+next_event_received = False
+
+# OLED #3 shows:
+# - Clock for 25 seconds
+# - Next event reminder for 5 seconds
+# - Repeat every 30 seconds
+
+DISPLAY_CYCLE_MS = 30000
+REMINDER_DURATION_MS = 5000
+
+display_cycle_start = time.ticks_ms()
+reminder_is_visible = False
+
+
 def receive_packet():
 
     global buffer
 
     if uart.any():
 
-        buffer += uart.read()
+        received_data = uart.read()
+
+        if received_data:
+            buffer += received_data
 
         if b"\n" in buffer:
 
@@ -116,7 +143,9 @@ def start_clock(packet):
 
     clock_synchronized = True
 
-    display_clock()
+    # Update the clock only when its page is visible.
+    if not reminder_is_visible:
+        display_clock()
 
     print("Clock synchronized:")
     print(
@@ -230,7 +259,9 @@ def update_clock():
             clock_last_update
         )
 
-        display_clock()
+        # Don't overwrite the reminder with the clock.
+        if not reminder_is_visible:
+            display_clock()
 
 
 def display_clock():
@@ -260,6 +291,104 @@ def display_clock():
             clock_year
         )
     )
+
+
+# ========================================
+# NEXT EVENT REMINDER
+# ========================================
+
+def display_next_event(packet):
+
+    global next_event_time
+    global next_event_date
+    global next_event_label
+    global next_event_received
+
+    data = packet["data"]
+
+    next_event_time = data.get(
+        "time",
+        "--:--"
+    )
+
+    next_event_date = data.get(
+        "date",
+        "--/--/----"
+    )
+
+    next_event_label = data.get(
+        "label",
+        "SCHEDULED UPDATE"
+    )
+
+    next_event_received = True
+
+    print("Next event received:")
+    print("Time:", next_event_time)
+    print("Date:", next_event_date)
+    print("Event:", next_event_label)
+
+    # Don't force the reminder onto the screen here.
+    # The timed display cycle decides when it appears.
+
+
+def show_next_event():
+
+    display_text(
+        3,
+        "NEXT UPDATE AT",
+        next_event_time,
+        next_event_date,
+        next_event_label
+    )
+
+
+def update_display_cycle():
+
+    global display_cycle_start
+    global reminder_is_visible
+
+    now = time.ticks_ms()
+
+    elapsed = time.ticks_diff(
+        now,
+        display_cycle_start
+    )
+
+    # Start a new 30-second cycle when necessary.
+    if elapsed >= DISPLAY_CYCLE_MS:
+
+        display_cycle_start = time.ticks_add(
+            display_cycle_start,
+            (elapsed // DISPLAY_CYCLE_MS)
+            * DISPLAY_CYCLE_MS
+        )
+
+        elapsed = time.ticks_diff(
+            now,
+            display_cycle_start
+        )
+
+    # First 25 seconds: clock.
+    if elapsed < (
+        DISPLAY_CYCLE_MS - REMINDER_DURATION_MS
+    ):
+
+        if reminder_is_visible:
+
+            reminder_is_visible = False
+            display_clock()
+
+    # Last 5 seconds: next event reminder.
+    else:
+
+        if (
+            not reminder_is_visible
+            and next_event_received
+        ):
+
+            reminder_is_visible = True
+            show_next_event()
 
 
 # ========================================
@@ -339,6 +468,10 @@ while True:
 
             start_clock(packet)
 
+        elif packet["mode"] == "next_event":
+
+            display_next_event(packet)
+
         elif packet["mode"] == "stocks":
 
             display_stocks(packet)
@@ -368,6 +501,10 @@ while True:
 
     update_clock()
 
+    update_display_cycle()
+
     update_news()
 
     time.sleep_ms(10)
+
+
